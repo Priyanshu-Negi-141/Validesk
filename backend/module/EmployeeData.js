@@ -27,8 +27,7 @@ const userSchema = new Schema({
     },
     mobile_number:{
         type:Number,
-        required: true,
-        sparse: true,
+        required: true
         
     },
     gender:{
