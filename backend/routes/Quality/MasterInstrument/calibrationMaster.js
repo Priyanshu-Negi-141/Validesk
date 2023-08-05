@@ -2,7 +2,7 @@ const express = require("express");
 const CalibrationMasterData = require("../../../module/Quality/MasterInstrument/CalibrationMaster");
 const router = express.Router()
 
-
+ 
 // Define the API endpoint to receive data
 // POST route to store data in the CalibrationMaster collection
 router.post("/addCalibrationMasterData", async (req, res) => {
