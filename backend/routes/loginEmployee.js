@@ -7,6 +7,7 @@ const {body, validationResult} = require('express-validator')
 var jwt = require('jsonwebtoken')
 const JWT_SECRET = "ValidexIndia"
 var fetchEmployee = require("../middleware/fetchEmployee")
+const EmployeeDetails = require("../module/HRM/Employee/AddEmployee.js/EmployeeDetails")
 
 // Authenticate user
 router.post('/login',[
@@ -51,48 +52,95 @@ router.post('/login',[
   })
 
   // Authenticate user with mobile
+  // router.post('/loginEmployee', [
+  //   body('mobile_number', 'Enter a valid Mobile Number').exists().notEmpty().isMobilePhone(),
+  //   body('password', 'Password cannot be blank').exists().notEmpty()
+  // ], async (req, res) => {
+  //   try {
+  //     let success = false;
+  //     const errors = validationResult(req);
+  //     if (!errors.isEmpty()) {
+  //       return res.status(400).json({
+  //         errors: errors.array()
+  //       });
+  //     }
+  //     const { mobile_number, password } = req.body;
+  //     try {
+  //       let employeeData = await EmployeeData.findOne({ mobile_number });
+  //       if (!employeeData) {
+  //         // If no employee data found, create a default admin account
+  //         const defaultAdminData = {
+  //           mobile_number: '00001',
+  //           password: 'admin' // You can set a secure password here
+  //         };
+  //         employeeData = await EmployeeData.create(defaultAdminData);
+  //         success = true;
+  //       } else {
+  //         const passwordCompare = await bcrypt.compare(password, employeeData.password);
+  //         if (!passwordCompare) {
+  //           return res.status(400).json({ success, error: "Please try to login with correct password" });
+  //         }
+  //       }
+  
+  //       const data = {
+  //         employeeData: {
+  //           id: employeeData._id
+  //         }
+  //       };
+  //       const authtoken = jwt.sign(data, JWT_SECRET);
+  //       success = true;
+  //       res.json({ success, "authtoken": authtoken });
+  //     } catch (error) {
+  //       console.error('Error in Login user', error);
+  //       res.status(500).send("Internal Server Error");
+  //     }
+  //   } catch (error) {
+  //     console.error('Error in Login user', error);
+  //     res.status(500).send("Some Error Occurred");
+  //   }
+  // });
+
+
   router.post('/loginEmployee', [
     body('mobile_number', 'Enter a valid Mobile Number').exists().notEmpty().isMobilePhone(),
     body('password', 'Password cannot be blank').exists().notEmpty()
   ], async (req, res) => {
     try {
-      let success = false;
       const errors = validationResult(req);
       if (!errors.isEmpty()) {
         return res.status(400).json({
           errors: errors.array()
         });
       }
+      
       const { mobile_number, password } = req.body;
       try {
-        let employeeData = await EmployeeData.findOne({ mobile_number });
+        let employeeData = await EmployeeDetails.findOne({
+          'employeeData.mobile_number': mobile_number
+        });
         if (!employeeData) {
-          // If no employee data found, create a default admin account
-          const defaultAdminData = {
-            mobile_number: '00001',
-            password: 'admin' // You can set a secure password here
-          };
-          employeeData = await EmployeeData.create(defaultAdminData);
-          success = true;
-        } else {
-          const passwordCompare = await bcrypt.compare(password, employeeData.password);
-          if (!passwordCompare) {
-            return res.status(400).json({ success, error: "Please try to login with correct password" });
-          }
+          return res.status(400).json({ success: false, error: "No employee data found" });
         }
   
-        const data = {
-          employeeData: {
-            id: employeeData._id
+          const passwordCompare = await bcrypt.compare(password, employeeData.employeeData[0].password);
+        
+          if (!passwordCompare) {
+            return res.status(400).json({ success: false, error: "Invalid password" });
           }
-        };
-        const authtoken = jwt.sign(data, JWT_SECRET);
-        success = true;
-        res.json({ success, "authtoken": authtoken });
-      } catch (error) {
-        console.error('Error in Login user', error);
-        res.status(500).send("Internal Server Error");
-      }
+        
+          const data = {
+            employeeData: {
+              id: employeeData._id
+            }
+          };
+        
+          const authtoken = jwt.sign(data, JWT_SECRET);
+                
+          res.json({ success: true, authtoken });
+        } catch (error) {
+          console.error('Error comparing passwords:', error);
+          res.status(500).send("Internal Server Error");
+        }
     } catch (error) {
       console.error('Error in Login user', error);
       res.status(500).send("Some Error Occurred");

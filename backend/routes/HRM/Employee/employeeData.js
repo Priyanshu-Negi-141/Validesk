@@ -81,7 +81,15 @@ router.post("/addEmployeeData", async (req, res) => {
       designation,
       marital_status,
       blood,
+      aadharNumber,
+      panNumber,
       password,
+      correspondenceAddresses, // Add this field
+      permanentAddresses, // Add this field
+      emergencyDetails,
+      educationDetails,
+      prevOrganizationDetails,
+      employeeRole
     } = req.body;
 
     const existingEmployeeData = await EmployeeDetails.findOne({
@@ -95,7 +103,6 @@ router.post("/addEmployeeData", async (req, res) => {
 
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
-    const dobDate = moment(dob, 'YYYY-MM-DD').format('DD/MM/YYYY')
     const addEmployeeData = await EmployeeDetails.create({
       employeeData: [
         {
@@ -104,14 +111,22 @@ router.post("/addEmployeeData", async (req, res) => {
           email: email,
           fatherName: fatherName,
           motherName: motherName,
-          dob: dobDate,
+          dob: dob,
           mobile_number: mobileNumber,
           gender: gender,
           department: department,
           designation: designation,
           marital_status: marital_status,
           blood: blood,
+          aadharNumber: aadharNumber,
+          panNumber: panNumber,
           password: hashedPassword,
+          correspondenceAddresses: correspondenceAddresses, // Include this field
+          permanentAddresses: permanentAddresses,
+          emergencyDetails: emergencyDetails,
+          educationDetails: educationDetails,
+          prevOrganizationDetails: prevOrganizationDetails,
+          employeeRole: employeeRole,
         },
       ],
     });
@@ -126,6 +141,36 @@ router.post("/addEmployeeData", async (req, res) => {
   } catch (error) {
     console.log(error)
     res.status(500).json({ message: error.message });
+  }
+});
+
+// POST route to submit correspondence and permanent addresses for a specific user by _id
+router.post("/submit-addresses/:userId", async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const { correspondenceAddresses, permanentAddresses } = req.body;
+    console.log("User ID:", userId);
+    console.log("Correspondence Addresses:", correspondenceAddresses);
+    console.log("Permanent Addresses:", permanentAddresses);
+    const updatedEmployeeDetails = await EmployeeDetails.findOneAndUpdate(
+      { "employeeData._id": userId },
+      {
+        $set: {
+          "employeeData.$.correspondenceAddresses": correspondenceAddresses,
+          "employeeData.$.permanentAddresses": permanentAddresses,
+        },
+      },
+      { new: true }
+    );
+
+    if (!updatedEmployeeDetails) {
+      return res.status(404).json({ error: "User not found" });
+    }
+
+    res.status(200).json(updatedEmployeeDetails);
+  } catch (error) {
+    console.error("Error updating addresses:", error);
+    res.status(500).json({ error: "An error occurred while updating addresses" });
   }
 });
 
@@ -144,6 +189,35 @@ router.get("/fetchEmployeeData", fetchEmployee, async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+router.get("/fetchEmployeeDetails/:id", async (req, res) => {
+  try {
+    const employeeID = req.params.id;
+    console.log('Fetching employee with ID:', employeeID);
+
+    const employeeDataDoc = await EmployeeDetails.findById(employeeID);
+    
+    if (!employeeDataDoc) {
+      return res.status(404).json({ errors: "Employee Data not found" });
+    }
+
+    // Access the employeeData array from the retrieved document
+    const employeeData = employeeDataDoc.employeeData;
+    
+    res.send(employeeData);
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+
+
+
+
+
+
 
 // Get all user data
 router.get("/fetchAllEmployeeList", async (req, res) => {
@@ -164,7 +238,7 @@ router.get("/fetchUniqueID/:id", async (req, res) => {
     if (!empId) {
       throw "No such record found";
     } else {
-      res.json(empId);
+      res.json(empId.employeeData[0]);
     }
   } catch (err) {
     console.log("Error in fetching Unique Id");
@@ -175,36 +249,52 @@ router.get("/fetchUniqueID/:id", async (req, res) => {
 router.put("/fetchUniqueID/:id", (req, res) => {
   const { id } = req.params;
   const {
-    firstName,
-    lastName,
+    fName,
+    lName,
     email,
     fatherName,
     motherName,
     dob,
-    mobileNumber,
+    mobile_number,
     gender,
     department,
     designation,
     marital_status,
     blood,
+    aadharNumber,
+    password,
+    panNumber,
+    correspondenceAddresses, // Add this field
+    permanentAddresses, // Add this field
+    emergencyDetails,
+    educationDetails,
+    prevOrganizationDetails
   } = req.body;
   EmployeeDetails.findByIdAndUpdate(
     id,
     {
       employeeData: [
         {
-          fName: firstName,
-          lName: lastName,
+          fName: fName,
+          lName: lName,
           email: email,
           fatherName: fatherName,
           motherName: motherName,
           dob: dob,
-          mobile_number: mobileNumber,
+          mobile_number: mobile_number,
           gender: gender,
           department: department,
           designation: designation,
           marital_status: marital_status,
           blood: blood,
+          password: password,
+          aadharNumber: aadharNumber,
+          panNumber: panNumber,
+          correspondenceAddresses: correspondenceAddresses, // Include this field
+          permanentAddresses: permanentAddresses,
+          emergencyDetails: emergencyDetails,
+          educationDetails: educationDetails,
+          prevOrganizationDetails: prevOrganizationDetails,
         },
       ],
     },

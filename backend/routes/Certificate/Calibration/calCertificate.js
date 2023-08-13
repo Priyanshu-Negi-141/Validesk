@@ -511,10 +511,84 @@ async function findInstrumentAndUpdate(instrumentName, id, updatedData) {
 //   }
 // });
 
+// router.put("/instrument-data1/:instrumentName/:id", async (req, res) => {
+//   try {
+//     const { instrumentName, id } = req.params;
+//     const updatedData = req.body;
+
+//     let result = await CalibrationSRFData.findOne({
+//       "srf.instrumentDetails._id": id,
+//       "srf.instrumentDetails.instrument.instrument_name": instrumentName,
+//     });
+
+//     if (!result) {
+//       // If the data doesn't exist, check if the required fields are provided
+//       if (!updatedData.certificateNumber || !updatedData.instrument_name) {
+//         return res.status(400).json({
+//           error: "Missing required fields to create a new document.",
+//         });
+//       }
+
+//       // Create a new document with the provided data
+//       result = await CalibrationSRFData.create({
+//         srf: [
+//           {
+//             instrumentDetails: [
+//               {
+//                 _id: id,
+//                 instrument: {
+//                   updatedData,
+//                 },
+//               },
+//             ],
+//           },
+//         ],
+//       });
+//     } else {
+//       // Iterate through the srf array to find and update the instrument
+//       result.srf.forEach((srf) => {
+//         const instrumentIndex = srf.instrumentDetails.findIndex(
+//           (instrument) =>
+//             instrument._id.toString() === id &&
+//             instrument.instrument.instrument_name === instrumentName
+//         );
+
+//         if (instrumentIndex !== -1) {
+//           // Merge the existing instrument data with the updatedData
+//           srf.instrumentDetails[instrumentIndex].instrument = {
+//             ...srf.instrumentDetails[instrumentIndex].instrument,
+//             ...updatedData,
+//             certificateNumber:
+//               updatedData.certificateNumber ||
+//               srf.instrumentDetails[instrumentIndex].instrument
+//                 .certificateNumber,
+//           };
+//         }
+//       });
+
+//       // Save the updated document
+//       try {
+//         await result.save();
+//       } catch (error) {
+//         console.error("Error saving document:", error);
+//       }
+//     }
+
+//     res.status(200).json({ message: "Update successful" }); // Send a success response
+//   } catch (error) {
+//     console.log(error);
+//     res.status(500).json({ error: "Internal server error" });
+//   }
+// });
+
 router.put("/instrument-data1/:instrumentName/:id", async (req, res) => {
   try {
     const { instrumentName, id } = req.params;
     const updatedData = req.body;
+
+    console.log("Received instrumentName:", instrumentName);
+    console.log("Received id:", id);
+    console.log("Received updatedData:", updatedData);
 
     let result = await CalibrationSRFData.findOne({
       "srf.instrumentDetails._id": id,
@@ -537,14 +611,18 @@ router.put("/instrument-data1/:instrumentName/:id", async (req, res) => {
               {
                 _id: id,
                 instrument: {
-                  updatedData,
+                  updatedData
                 },
               },
             ],
           },
         ],
       });
+
+      console.log("Created new document:", result);
     } else {
+      console.log("Updating existing document");
+
       // Iterate through the srf array to find and update the instrument
       result.srf.forEach((srf) => {
         const instrumentIndex = srf.instrumentDetails.findIndex(
@@ -554,6 +632,8 @@ router.put("/instrument-data1/:instrumentName/:id", async (req, res) => {
         );
 
         if (instrumentIndex !== -1) {
+          console.log("Found instrument to update:", instrumentIndex);
+
           // Merge the existing instrument data with the updatedData
           srf.instrumentDetails[instrumentIndex].instrument = {
             ...srf.instrumentDetails[instrumentIndex].instrument,
@@ -566,9 +646,12 @@ router.put("/instrument-data1/:instrumentName/:id", async (req, res) => {
         }
       });
 
+      console.log("Updated document:", result);
+
       // Save the updated document
       try {
         await result.save();
+        console.log("Document saved successfully");
       } catch (error) {
         console.error("Error saving document:", error);
       }
