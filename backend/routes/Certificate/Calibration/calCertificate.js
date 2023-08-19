@@ -5,7 +5,7 @@ const router = express.Router();
 const { ObjectId } = require("mongoose");
 const CalibrationMasterData = require("../../../module/Quality/MasterInstrument/CalibrationMaster");
 const ElectroTechnicalSOPData = require("../../../module/Quality/SOP/ElectroTechnicalSOP");
-const EmployeeDetails = require("../../../module/HRM/Employee/AddEmployee.js/EmployeeDetails");
+const EmployeeDetails = require("../../../module/HRM/Employee/AddEmployee/EmployeeDetails");
 const HVACMasterData = require("../../../module/Quality/MasterInstrument/HVACMaster");
 const ThermalMasterData = require("../../../module/Quality/MasterInstrument/ThermalMaster");
 

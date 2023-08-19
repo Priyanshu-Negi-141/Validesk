@@ -3,7 +3,7 @@ const Schema = mongoose.Schema
 const dayReportSchema = new Schema({
     Employee:{
         id: {type: mongoose.Schema.Types.ObjectId,
-            ref:'EmployeeData',
+            ref:'EmployeeDetails',
             required: true
         },
         fName: {
@@ -17,7 +17,7 @@ const dayReportSchema = new Schema({
         department: {
             type: String,
             required: true,
-        }
+        },
     },  
     Date: {
         type: String,

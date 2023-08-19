@@ -7,7 +7,7 @@ const {body, validationResult} = require('express-validator')
 var jwt = require('jsonwebtoken')
 const JWT_SECRET = "ValidexIndia"
 var fetchEmployee = require("../middleware/fetchEmployee")
-const EmployeeDetails = require("../module/HRM/Employee/AddEmployee.js/EmployeeDetails")
+const EmployeeDetails = require("../module/HRM/Employee/AddEmployee/EmployeeDetails")
 
 // Authenticate user
 router.post('/login',[
