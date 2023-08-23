@@ -62,7 +62,7 @@ const userSchema = new Schema({
     aadharNumber: {type: String, required: true},
     panNumber: {type: String, required: true},
     password: {type: String, required: true},
-    user_pin: { type: String },
+    user_pin: { type: String, default: "" },
     correspondenceAddresses: [correspondenceAddressSchema],
     permanentAddresses: [permanentAddressSchema],
     emergencyDetails: [emergencyDetailsSchema],
@@ -71,7 +71,7 @@ const userSchema = new Schema({
     employeeRole: [employeeRoleSchema]
 });
 
-
+ 
 const employeeDataSchema = new Schema({
   employeeData: [userSchema],
 });

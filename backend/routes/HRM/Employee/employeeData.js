@@ -135,9 +135,9 @@ router.post("/addEmployeeData", async (req, res) => {
         id: addEmployeeData._id,
       },
     };
-    if(data){
-      updateEmployeeRecords();
-    }
+    // if(data){
+    //   updateEmployeeRecords();
+    // }
     const authtoken = jwt.sign(data, JWT_SECRET);
     res.json({ authtoken: authtoken });
   } catch (error) {
