@@ -16,7 +16,8 @@ app.use("/api/auth", require('./routes/loginEmployee'))
 app.use("/api/auth", require('./routes/HRM/employeData'))
 app.use("/api/employee", require('./routes/HRM/Employee/employeeData'))
 app.use('/api/dayReport', require('./routes/HRM/dayReportData'))
-app.use('/api/checkIn', require('./routes/HRM/checkInDataReport'))
+// app.use('/api/checkIn', require('./routes/HRM/checkInDataReport'))
+app.use('/api/checkInDetails', require('./routes/HRM/CheckInData/checkInDetailsReport'))
 app.use('/api/sop', require('./routes/Quality/SOP/electroTechnical'))
 app.use('/api/sop', require('./routes/Quality/SOP/mechenicalSOP'))
 app.use('/api/sop', require('./routes/Quality/SOP/thermalSOP'))
@@ -35,7 +36,7 @@ app.get('/', (req,res) => {
 // Port listening 
 app.listen(PORT, (err) => {
     if (!err){
-        console.log(`Server is running on port ${PORT}`)
+        console.log(`Server is running on port http://localhost:${PORT}`)
     }else{
         throw err;
     }

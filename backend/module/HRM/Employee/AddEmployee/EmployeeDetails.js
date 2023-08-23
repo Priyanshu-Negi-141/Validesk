@@ -62,6 +62,7 @@ const userSchema = new Schema({
     aadharNumber: {type: String, required: true},
     panNumber: {type: String, required: true},
     password: {type: String, required: true},
+    user_pin: { type: String },
     correspondenceAddresses: [correspondenceAddressSchema],
     permanentAddresses: [permanentAddressSchema],
     emergencyDetails: [emergencyDetailsSchema],
