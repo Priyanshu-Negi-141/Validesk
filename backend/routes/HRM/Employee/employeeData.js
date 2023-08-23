@@ -130,12 +130,14 @@ router.post("/addEmployeeData", async (req, res) => {
         },
       ],
     });
-
     const data = {
       employeeData: {
         id: addEmployeeData._id,
       },
     };
+    if(data){
+      updateEmployeeRecords();
+    }
     const authtoken = jwt.sign(data, JWT_SECRET);
     res.json({ authtoken: authtoken });
   } catch (error) {
@@ -143,6 +145,28 @@ router.post("/addEmployeeData", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+const updateEmployeeRecords = async () => {
+  try {
+    const employees = await EmployeeDetails.find();
+
+    for (const employee of employees) {
+      if (!employee.employeeData[0].user_pin) {
+        // Set a default user_pin value here if needed
+        employee.employeeData[0].user_pin = '';
+
+        await employee.save();
+        console.log(`Updated user_pin for employee with ID: ${employee._id}`);
+      }
+    }
+
+    console.log('All records updated successfully.');
+  } catch (error) {
+    console.error('Error updating records:', error);
+  }
+};
+
+
 
 // POST route to submit correspondence and permanent addresses for a specific user by _id
 router.post("/submit-addresses/:userId", async (req, res) => {
