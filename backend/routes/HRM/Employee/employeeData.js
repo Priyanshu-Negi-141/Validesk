@@ -337,54 +337,114 @@ router.get("/fetchUniqueID/:id", async (req, res) => {
 // }); 
 
 
+// router.put("/fetchUniqueID/:id", (req, res) => {
+//   const { id } = req.params;
+//   const {
+//     fName,
+//     lName,
+//     email,
+//     fatherName,
+//     motherName,
+//     dob,
+//     mobile_number,
+//     gender,
+//     department,
+//     designation,
+//     marital_status,
+//     blood,
+//     aadharNumber,
+//     password,
+//     panNumber,
+//     correspondenceAddresses,
+//     permanentAddresses,
+//     emergencyDetails,
+//     educationDetails,
+//     prevOrganizationDetails
+//   } = req.body;
+  
+//   // Create an object containing the fields to be updated
+//   const updateData = {
+//     fName,
+//     lName,
+//     email,
+//     fatherName,
+//     motherName,
+//     dob,
+//     mobile_number,
+//     gender,
+//     department,
+//     designation,
+//     marital_status,
+//     blood,
+//     aadharNumber,
+//     password,
+//     panNumber,
+//     correspondenceAddresses,
+//     permanentAddresses,
+//     emergencyDetails,
+//     educationDetails,
+//     prevOrganizationDetails
+//   };
+
+//   // Exclude user_pin from the update if it exists in the existing document
+//   if (req.body.hasOwnProperty('user_pin')) {
+//     updateData.user_pin = req.body.user_pin;
+//   }
+
+//   EmployeeDetails.findByIdAndUpdate(
+//     id,
+//     {
+//       employeeData: [updateData], // Use the created updateData object
+//     },
+//     { new: true }
+//   )
+//     .then((updatedEmployee) => {
+//       if (!updatedEmployee) {
+//         return res.status(404).json({ error: "Employee not found" });
+//       }
+//       res.json(updatedEmployee);
+//     })
+//     .catch((error) => {
+//       console.error("Error updating employee:", error);
+//       res.status(500).json({ error: "Internal server error" });
+//     });
+// });
+
+
 router.put("/fetchUniqueID/:id", (req, res) => {
   const { id } = req.params;
-  const {
-    fName,
-    lName,
-    email,
-    fatherName,
-    motherName,
-    dob,
-    mobile_number,
-    gender,
-    department,
-    designation,
-    marital_status,
-    blood,
-    aadharNumber,
-    password,
-    panNumber,
-    correspondenceAddresses,
-    permanentAddresses,
-    emergencyDetails,
-    educationDetails,
-    prevOrganizationDetails
-  } = req.body;
   
+  // List of fields that can be updated
+  const updatableFields = [
+    "fName",
+    "lName",
+    "email",
+    "fatherName",
+    "motherName",
+    "dob",
+    "mobile_number",
+    "gender",
+    "department",
+    "designation",
+    "marital_status",
+    "blood",
+    "aadharNumber",
+    "password",
+    "panNumber",
+    "correspondenceAddresses",
+    "permanentAddresses",
+    "emergencyDetails",
+    "educationDetails",
+    "prevOrganizationDetails"
+  ];
+
   // Create an object containing the fields to be updated
-  const updateData = {
-    fName,
-    lName,
-    email,
-    fatherName,
-    motherName,
-    dob,
-    mobile_number,
-    gender,
-    department,
-    designation,
-    marital_status,
-    blood,
-    aadharNumber,
-    password,
-    panNumber,
-    correspondenceAddresses,
-    permanentAddresses,
-    emergencyDetails,
-    educationDetails,
-    prevOrganizationDetails
-  };
+  const updateData = {};
+  for (const field of updatableFields) {
+    if (req.body.hasOwnProperty(field)) {
+      updateData[field] = req.body[field];
+    }
+  }
 
   // Exclude user_pin from the update if it exists in the existing document
   if (req.body.hasOwnProperty('user_pin')) {
