@@ -78,7 +78,7 @@ const router = express.Router()
 
 router.post('/addCheckIn', fetchEmployee, async (req, res) => {
     try {
-        const { login, login_location, checkInType, login_address, site_name } = req.body;
+        const { login, login_location, checkInType,activity, login_address, site_name } = req.body;
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
@@ -131,6 +131,7 @@ router.post('/addCheckIn', fetchEmployee, async (req, res) => {
             },
             login: login,
             checkInType: checkInType,
+            activity: activity,
             login_location: {
                 latitude: login_location.latitude,
                 longitude: login_location.longitude,
@@ -157,6 +158,10 @@ router.post('/addCheckIn', fetchEmployee, async (req, res) => {
         res.status(500).json({ message: 'An error occurred' });
     }
 });
+
+
+
+
 
 
 router.post('/addLocationData/:id', async (req, res) => {

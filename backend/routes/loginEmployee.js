@@ -100,57 +100,57 @@ router.post('/login',[
   //   }
   // });
 
-
-  router.post('/loginEmployee', [
-    body('mobile_number', 'Enter a valid Mobile Number').exists().notEmpty().isMobilePhone(),
-    body('password', 'Password cannot be blank').exists().notEmpty()
-  ], async (req, res) => {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          errors: errors.array()
-        });
-      }
+// The below code is good don't delete it it might use in future
+  // router.post('/loginEmployee', [
+  //   body('mobile_number', 'Enter a valid Mobile Number').exists().notEmpty().isMobilePhone(),
+  //   body('password', 'Password cannot be blank').exists().notEmpty()
+  // ], async (req, res) => {
+  //   try {
+  //     const errors = validationResult(req);
+  //     if (!errors.isEmpty()) {
+  //       return res.status(400).json({
+  //         errors: errors.array()
+  //       });
+  //     }
       
-      const { mobile_number, password } = req.body;
-      try {
-        let employeeData = await EmployeeDetails.findOne({
-          'employeeData.mobile_number': mobile_number
-        });
-        if (!employeeData) {
-          return res.status(400).json({ success: false, error: "No employee data found" });
-        }
+  //     const { mobile_number, password } = req.body;
+  //     try {
+  //       let employeeData = await EmployeeDetails.findOne({
+  //         'employeeData.mobile_number': mobile_number
+  //       });
+  //       if (!employeeData) {
+  //         return res.status(400).json({ success: false, error: "No employee data found" });
+  //       }
   
-          const passwordCompare = await bcrypt.compare(password, employeeData.employeeData[0].password);
+  //         const passwordCompare = await bcrypt.compare(password, employeeData.employeeData[0].password);
         
-          if (!passwordCompare) {
-            return res.status(400).json({ success: false, error: "Invalid password" });
-          }
+  //         if (!passwordCompare) {
+  //           return res.status(400).json({ success: false, error: "Invalid password" });
+  //         }
         
-          const data = {
-            employeeData: {
-              id: employeeData._id
-            }
-          };
+  //         const data = {
+  //           employeeData: {
+  //             id: employeeData._id
+  //           }
+  //         };
         
-          const authtoken = jwt.sign(data, JWT_SECRET);
+  //         const authtoken = jwt.sign(data, JWT_SECRET);
                 
-          res.json({ success: true, authtoken });
-        } catch (error) {
-          console.error('Error comparing passwords:', error);
-          res.status(500).send("Internal Server Error");
-        }
-    } catch (error) {
-      console.error('Error in Login user', error);
-      res.status(500).send("Some Error Occurred");
-    }
-  });
-
+  //         res.json({ success: true, authtoken });
+  //       } catch (error) {
+  //         console.error('Error comparing passwords:', error);
+  //         res.status(500).send("Internal Server Error");
+  //       }
+  //   } catch (error) {
+  //     console.error('Error in Login user', error);
+  //     res.status(500).send("Some Error Occurred");
+  //   }
+  // });
+// The End 
 
 
   router.post(
-    '/loginEmployeeTrial',
+    '/loginEmployee',
     [
       body('mobile_number', 'Enter a valid Mobile Number').exists().notEmpty().isMobilePhone(),
       body('password', 'Password cannot be blank').exists().notEmpty(),
@@ -204,39 +204,36 @@ router.post('/login',[
     }
   );
   
-  router.post('/createPin',fetchEmployee, async (req, res) => {
+  router.post('/createPin', fetchEmployee, async (req, res) => {
     try {
-      // const authToken = req.headers['auth-token']; // Get authToken from headers
       const { pin } = req.body;
   
-      // Verify the authToken
-      try {
-        const userId = req.employeeData.id;
+      const userId = req.employeeData.id;
   
-        // Check if the user has already created a PIN
-        const employee = await EmployeeDetails.findById(userId);
-        console.log(employee)
-        if (!employee) {
-          return res.status(400).json({ success: false, error: 'User not found' });
-        }
-        console.log(employee.employeeData[0].user_pin)
-        if (employee.employeeData[0].user_pin) {
-          return res.status(400).json({ success: false, error: 'User already has a PIN' });
-        }
-  
-        // Hash the PIN (assuming the pin is a numeric string)
-        const hashedPin = await bcrypt.hash(pin, 10);
-  
-        // Update the user's user_pin in the database
-        employee.employeeData[0].user_pin = hashedPin;
-        await employee.save();
-  
-        // Return a success response
-        res.json({ success: true, message: 'PIN created successfully' });
-      } catch (error) {
-        console.error('Error verifying authToken:', error);
-        res.status(401).json({ success: false, error: 'Invalid authToken' });
+      // Check if the user has already created a PIN
+      const employee = await EmployeeDetails.findById(userId);
+      if (!employee) {
+        return res.status(400).json({ success: false, error: 'User not found' });
       }
+  
+      if (employee.employeeData[0].user_pin) {
+        return res.status(400).json({ success: false, error: 'User already has a PIN' });
+      }
+  
+      // Hash the PIN (assuming the pin is a numeric string)
+      const hashedPin = await bcrypt.hash(pin, 10);
+  
+      // Validate required fields before saving
+      if (!employee.employeeData[0].department || !employee.employeeData[0].designation) {
+        return res.status(400).json({ success: false, error: 'Missing department or designation' });
+      }
+  
+      // Update the user's user_pin in the database
+      employee.employeeData[0].user_pin = hashedPin;
+      await employee.save();
+  
+      // Return a success response
+      res.json({ success: true, message: 'PIN created successfully' });
     } catch (error) {
       console.error('Error creating PIN:', error);
       res.status(500).send('Internal Server Error');
@@ -285,7 +282,7 @@ router.post('/login',[
       res.status(500).send('Internal Server Error');
     }
   });
-   
+    
   
   
 module.exports = router

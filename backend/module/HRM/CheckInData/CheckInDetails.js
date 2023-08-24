@@ -21,6 +21,7 @@ const checkInSchema = new Schema({
     mobile_number: {type: String,required: true,},
   },
   date: {type: Date,default: Date.now,required: true,},
+  activity: {type: String,require: true,},
   checkInType: {type: String,require: true,},
   site_name: {type: String,require: true,},
   login_location: {
