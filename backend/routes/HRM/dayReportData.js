@@ -5,7 +5,7 @@ const DayReportData = require("../../module/DayReport");
 var fetchEmployee = require("../../middleware/fetchEmployee");
 const EmployeeData = require("../../module/EmployeeData");
 const EmployeeDetails = require("../../module/HRM/Employee/AddEmployee/EmployeeDetails");
-
+ 
 // Post DayReport Data to the DataBase
 
 router.post(
