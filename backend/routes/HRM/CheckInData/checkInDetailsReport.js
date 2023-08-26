@@ -2,7 +2,7 @@ const express = require('express');
 const EmployeeDetails = require('../../../module/HRM/Employee/AddEmployee/EmployeeDetails');
 const CheckInDetails = require('../../../module/HRM/CheckInData/CheckInDetails');
 const fetchEmployee = require('../../../middleware/fetchEmployee');
-const { body, validationResult } = require("express-validator");
+const { body, validationResult, check } = require("express-validator");
 const router = express.Router()
 
 
@@ -79,14 +79,10 @@ const router = express.Router()
 router.post('/addCheckIn', fetchEmployee, async (req, res) => {
     try {
         const { login, login_location, checkInType,activity, login_address, site_name } = req.body;
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
+       
         const employee = await EmployeeDetails.findById(req.employeeData.id);
         if (!employee) {
-            return res.status(404).json({ error: 'Employee not found' });
+            return res.status(404).json({status: false, message: 'Employee not found', data: null});
         }
         const employeeDetailsData = employee.employeeData[0];
 
@@ -108,14 +104,14 @@ router.post('/addCheckIn', fetchEmployee, async (req, res) => {
         
 
         if (existingCheckIn && existingCheckIn.checkedInToday) {
-            return res.status(400).json({ error: 'You have already checked in today.' });
+            return res.status(400).json({status: false, message: 'You have already checked in today.', data: null });
         }
         
         
         if (existingCheckIn) {
             existingCheckIn.checkedInToday = true;
-            await existingCheckIn.save();
-            return res.status(200).json({ message: 'Check-in data updated successfully' });
+            const checkToday = await existingCheckIn.save();
+            return res.status(200).json({status: true, message: 'Check-in data updated successfully', data: checkToday });
         }
         
 
@@ -151,11 +147,11 @@ router.post('/addCheckIn', fetchEmployee, async (req, res) => {
         });
 
         const checkIn = await checkInDetails.save();
-        res.status(201).json({ message: 'Check-in data added successfully' });
+        res.status(201).json({status: true, message: 'Check-in data added successfully', data: checkIn });
         // console.log(`New record created ${checkIn}`);
     } catch (error) {
         console.error('Error adding check-in data:', error);
-        res.status(500).json({ message: 'An error occurred' });
+        res.status(500).json({status: false, message: 'An error occurred', data: error});
     }
 });
 
@@ -171,17 +167,17 @@ router.post('/addLocationData/:id', async (req, res) => {
 
         const checkIn = await CheckInDetails.findById(checkInId);
         if (!checkIn) {
-            return res.status(404).json({ error: 'Check-in data not found' });
+            return res.status(404).json({status: false, message: 'Check-in data not found', data: null });
         }
 
         // Check if logout details have already been submitted
         if (checkIn.logout_location && checkIn.logout_address) {
-            return res.status(400).json({ error: 'You have already checked out. Please check in again.' });
+            return res.status(400).json({status: false, message: 'You have already checked out. Please check in again.', data:null });
         }
 
         // Check if login details haven't been submitted
         if (!checkIn.login_location || !checkIn.login_address) {
-            return res.status(400).json({ error: 'Please check in first before adding location data.' });
+            return res.status(400).json({status: false, message: 'Please check in first before adding location data.', data: null });
         }
 
         // Add location data only if login details have been submitted and logout details haven't
@@ -193,12 +189,12 @@ router.post('/addLocationData/:id', async (req, res) => {
         };
 
         checkIn.locationData.push(newLocationData);
-        await checkIn.save();
+        const locData = await checkIn.save();
 
-        res.status(201).json({ message: 'Location data added successfully' });
+        res.status(201).json({status: true, message: 'Location data added successfully', data: locData});
     } catch (error) {
         console.error('Error adding location data:', error);
-        res.status(500).json({ message: 'An error occurred' });
+        res.status(500).json({status: false, message: 'An error occurred', data: error });
     }
 });
 
@@ -210,12 +206,12 @@ router.post('/addLogoutDetails/:id', async (req, res) => {
 
         const checkIn = await CheckInDetails.findById(checkInId);
         if (!checkIn) {
-            return res.status(404).json({ error: 'Check-in data not found' });
+            return res.status(404).json({status: false, message: 'Check-in data not found', data: null });
         }
 
         // Check if logout details already exist
         if (checkIn.logout_location && checkIn.logout_address) {
-            return res.status(400).json({ error: 'Logout details have already been submitted' });
+            return res.status(400).json({ status: false, message: 'Logout details have already been submitted', data: null });
         }
 
         checkIn.logout_location = {
@@ -233,12 +229,12 @@ router.post('/addLogoutDetails/:id', async (req, res) => {
             fetchTime: new Date()
         });
 
-        await checkIn.save();
+        const newCheckInData = await checkIn.save();
 
-        res.status(201).json({ message: 'Logout details submitted successfully' });
+        res.status(201).json({ status: true, message: 'Logout details submitted successfully',  data: newCheckInData});
     } catch (error) {
         console.error('Error submitting logout details:', error);
-        res.status(500).json({ message: 'An error occurred' });
+        res.status(500).json({status: false, message: 'An error occurred', data: error });
     }
 });
 
@@ -254,13 +250,13 @@ router.get('/getLocationData/:id', async (req, res) => {
 
         const checkIn = await CheckInDetails.findById(checkInId);
         if (!checkIn) {
-            return res.status(404).json({ error: 'Check-in data not found' });
+            return res.status(404).json({ status: false, message: 'Check-in data not found', data: null });
         }
 
-        res.status(200).json({ locationData: checkIn.locationData });
+        res.status(200).json({status: true, message: "Check-In data found Successfully", data: checkIn.locationData });
     } catch (error) {
         console.error('Error fetching location data:', error);
-        res.status(500).json({ message: 'An error occurred' });
+        res.status(500).json({ status: false, message: 'An error occurred', data: error });
     }
 });
 
@@ -269,9 +265,9 @@ router.get('/getLocationData/:id', async (req, res) => {
 router.get("/checkin-details", async (req, res) => {
     try {
       const checkIns = await CheckInDetails.find();
-      res.json(checkIns);
+      res.json({status: true, message:"User CheckIn Details", data: checkIns});
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch check-in details." });
+      res.status(500).json({ status: false, message: "Failed to fetch check-in details.", data: error });
     }
   });
   
@@ -280,11 +276,11 @@ router.get("/checkin-details", async (req, res) => {
     try {
       const checkIn = await CheckInDetails.findById(req.params.id);
       if (!checkIn) {
-        return res.status(404).json({ error: "Check-in detail not found." });
+        return res.status(404).json({ status: false, message: "Check-in detail not found.", data: null });
       }
-      res.json(checkIn);
+      res.json({status: true, message: "Check In Details fetched Successfully",data: checkIn});
     } catch (error) {
-      res.status(500).json({ error: "Failed to fetch check-in detail." });
+      res.status(500).json({ status: false, message: "Failed to fetch check-in detail.", data: error });
     }
   });
   
@@ -320,10 +316,10 @@ router.post('/checkInEmployeeData', async (req, res) => {
   
       // Fetch data based on the filter criteria
       const calibrationData = await CheckInDetails.find(filter);
-      res.json(calibrationData);
+      res.json({status: true, message: "Employee Checkin Data fetched Successfully",data: calibrationData});
     } catch (error) {
       console.error(error);
-      res.status(500).json({ error: 'Internal Server Error' });
+      res.status(500).json({ status: false, message: 'Internal Server Error', data: error });
     }
   });
   

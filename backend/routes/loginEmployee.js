@@ -169,14 +169,19 @@ router.post('/login',[
           let employeeData = await EmployeeDetails.findOne({
             'employeeData.mobile_number': mobile_number,
           });
+          // if (!employeeData) {
+          //   return res.status(400).json({ success: false, error: 'No employee data found' });
+          // }
+
           if (!employeeData) {
-            return res.status(400).json({ success: false, error: 'No employee data found' });
+            return res.status(400).json({ status: false, message: 'No employee data found', data: null });
           }
+          
   
           const passwordCompare = await bcrypt.compare(password, employeeData.employeeData[0].password);
   
           if (!passwordCompare) {
-            return res.status(400).json({ success: false, error: 'Invalid password' });
+            return res.status(400).json({ success: false, message: 'Invalid password', data: null});
           }
   
           const data = {
@@ -192,14 +197,14 @@ router.post('/login',[
   
           const authtoken = jwt.sign(data, JWT_SECRET);
   
-          res.json({ success: true, authtoken });
+          res.json({ status: true, message: "Employee Login Successfully" ,data: authtoken });
         } catch (error) {
           console.error('Error comparing passwords:', error);
-          res.status(500).send('Internal Server Error');
+          return res.status(500).json({status: false, message: 'Internal Server Error', data: null});
         }
       } catch (error) {
         console.error('Error in Login user', error);
-        res.status(500).send('Some Error Occurred');
+        res.status(500).json({status: false, message: 'Some Error Occurred', data: null});
       }
     }
   );
@@ -213,30 +218,25 @@ router.post('/login',[
       // Check if the user has already created a PIN
       const employee = await EmployeeDetails.findById(userId);
       if (!employee) {
-        return res.status(400).json({ success: false, error: 'User not found' });
+        return res.status(400).json({ status: false, message: 'User not found', data: null });
       }
   
       if (employee.employeeData[0].user_pin) {
-        return res.status(400).json({ success: false, error: 'User already has a PIN' });
+        return res.status(400).json({ status: false, message: 'User already has a PIN', data: null });
       }
   
       // Hash the PIN (assuming the pin is a numeric string)
       const hashedPin = await bcrypt.hash(pin, 10);
-  
-      // Validate required fields before saving
-      if (!employee.employeeData[0].department || !employee.employeeData[0].designation) {
-        return res.status(400).json({ success: false, error: 'Missing department or designation' });
-      }
   
       // Update the user's user_pin in the database
       employee.employeeData[0].user_pin = hashedPin;
       await employee.save();
   
       // Return a success response
-      res.json({ success: true, message: 'PIN created successfully' });
+      res.json({ status: true, message: 'PIN created successfully' , data: null});
     } catch (error) {
       console.error('Error creating PIN:', error);
-      res.status(500).send('Internal Server Error');
+      res.status(500).json({status: false, message: 'Internal Server Error', data: null});
     }
   });
 
@@ -253,14 +253,14 @@ router.post('/login',[
         const employee = await EmployeeDetails.findById(userId);
   
         if (!employee) {
-          return res.status(400).json({ success: false, error: 'User not found' });
+          return res.status(400).json({ status: false, message: 'User not found', data: null });
         }
   
         // Compare the provided pin with the stored hashed user_pin
         const pinMatch = await bcrypt.compare(pin, employee.employeeData[0].user_pin);
   
         if (!pinMatch) {
-          return res.status(400).json({ success: false, error: 'Invalid PIN' });
+          return res.status(400).json({ status: false, message: 'Invalid PIN', data: null });
         }
   
         // If the PIN matches, create a new JWT token for the user
@@ -272,14 +272,14 @@ router.post('/login',[
         const newAuthToken = jwt.sign(data, JWT_SECRET);
   
         // Return the new JWT token as the response
-        res.json({ success: true, authtoken: newAuthToken });
+        res.json({ status: true, message: "User login successfully" , data: newAuthToken});
       } catch (error) {
         console.error('Error verifying authToken:', error);
-        res.status(401).json({ success: false, error: 'Invalid authToken' });
+        res.status(401).json({ status: false, message: 'Invalid authToken', data:null });
       }
     } catch (error) {
       console.error('Error logging in with PIN:', error);
-      res.status(500).send('Internal Server Error');
+      res.status(500).json({status: false,message: 'Internal Server Error', data:null});
     }
   });
     
