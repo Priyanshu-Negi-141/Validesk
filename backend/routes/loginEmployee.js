@@ -196,8 +196,14 @@ router.post('/login',[
           }
   
           const authtoken = jwt.sign(data, JWT_SECRET);
+          const employeeFirstName = employeeData.employeeData[0].fName; // Assuming the field name is 'firstName'
+          const employeeLastName = employeeData.employeeData[0].lName; 
   
-          res.json({ status: true, message: "Employee Login Successfully" ,data: authtoken });
+          res.json({ status: true, message: "Employee Login Successfully" ,data: {
+            authtoken,
+            firstName: employeeFirstName,
+            lastName: employeeLastName,
+          } });
         } catch (error) {
           console.error('Error comparing passwords:', error);
           return res.status(500).json({status: false, message: 'Internal Server Error', data: null});
@@ -211,7 +217,7 @@ router.post('/login',[
   
   router.post('/createPin', fetchEmployee, async (req, res) => {
     try {
-      const { pin } = req.body;
+      const { pin } = req.body; 
   
       const userId = req.employeeData.id;
   

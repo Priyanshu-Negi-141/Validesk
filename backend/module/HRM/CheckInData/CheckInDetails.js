@@ -16,7 +16,7 @@ const checkInSchema = new Schema({
       required: true,
     },
     fName: { type: String, required: true },
-    lName: { type: String, required: true },
+    lName: { type: String },
     department: { type: String, required: true },
     mobile_number: {type: String,required: true,},
   },

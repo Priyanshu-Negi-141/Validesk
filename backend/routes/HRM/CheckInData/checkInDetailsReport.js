@@ -98,20 +98,16 @@ router.post('/addCheckIn', fetchEmployee, async (req, res) => {
             }
         });
         
-        console.log("Employee ID", employee._id)
-        console.log("Date", today)
-        console.log("Existing Checkin",existingCheckIn)
-        
 
         if (existingCheckIn && existingCheckIn.checkedInToday) {
-            return res.status(400).json({status: false, message: 'You have already checked in today.', data: null });
+            return res.status(200).json({status: false, message: 'You have already checked in today.', data: null });
         }
         
         
         if (existingCheckIn) {
             existingCheckIn.checkedInToday = true;
             const checkToday = await existingCheckIn.save();
-            return res.status(200).json({status: true, message: 'Check-in data updated successfully', data: checkToday });
+            return res.status(200).json({status: true, message: 'Check-in data updated successfully', data: checkToday._id });
         }
         
 
@@ -147,7 +143,7 @@ router.post('/addCheckIn', fetchEmployee, async (req, res) => {
         });
 
         const checkIn = await checkInDetails.save();
-        res.status(201).json({status: true, message: 'Check-in data added successfully', data: checkIn });
+        res.status(201).json({status: true, message: 'Check-in data added successfully', data: checkIn._id });
         // console.log(`New record created ${checkIn}`);
     } catch (error) {
         console.error('Error adding check-in data:', error);
@@ -172,7 +168,7 @@ router.post('/addLocationData/:id', async (req, res) => {
 
         // Check if logout details have already been submitted
         if (checkIn.logout_location && checkIn.logout_address) {
-            return res.status(400).json({status: false, message: 'You have already checked out. Please check in again.', data:null });
+            return res.status(200).json({status: false, message: 'You have already checked out. Please check in again.', data:null });
         }
 
         // Check if login details haven't been submitted
@@ -211,7 +207,7 @@ router.post('/addLogoutDetails/:id', async (req, res) => {
 
         // Check if logout details already exist
         if (checkIn.logout_location && checkIn.logout_address) {
-            return res.status(400).json({ status: false, message: 'Logout details have already been submitted', data: null });
+            return res.status(200).json({ status: false, message: 'Logout details have already been submitted', data: null });
         }
 
         checkIn.logout_location = {
