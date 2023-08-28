@@ -74,7 +74,7 @@ const router = express.Router()
 //         res.status(500).json({ message: 'An error occurred' });
 //     }
 // });
-
+ 
 
 router.post('/addCheckIn', fetchEmployee, async (req, res) => {
     try {

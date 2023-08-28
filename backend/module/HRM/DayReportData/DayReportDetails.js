@@ -11,8 +11,7 @@ const dayReportSchema = new Schema({
             required: true,
         },
         lName: {
-            type: String,
-            required: true,
+            type: String
         },
         department: {
             type: String,

@@ -8,7 +8,7 @@ const DayReportDetails = require("../../../module/HRM/DayReportData/DayReportDet
 router.post(
   "/addDayReport",
   fetchEmployee,
-  [
+  [ 
     body("SiteName", "Enter Site Name").isLength({ min: 2 }),
     body("Description", "Description atleast 3 character").isLength({ min: 3 }),
   ],
