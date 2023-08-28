@@ -212,12 +212,26 @@ router.post('/login',[
         console.error('Error in Login user', error);
         res.status(500).json({status: false, message: 'Some Error Occurred', data: null});
       }
-    }
+    } 
   );
   
-  router.post('/createPin', fetchEmployee, async (req, res) => {
+  router.post('/createPin', fetchEmployee,
+  [
+    body('pin')
+        .exists().withMessage('Pin is required')
+        .notEmpty().withMessage('Pin cannot be empty')
+        .isNumeric().withMessage('Pin must be a number')
+        .isLength({ min: 6, max: 6 }).withMessage('Pin must have exactly 6 digits')
+],
+  async (req, res) => {
     try {
-      const { pin } = req.body; 
+      const { pin } = req.body;
+      const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+          return res.status(400).json({
+            errors: errors.array(),
+          });
+        }
   
       const userId = req.employeeData.id;
   

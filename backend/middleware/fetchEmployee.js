@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const JWT_SECRET = "ValidexIndia"
-const fetchEmployee = (req,res,next) => {
+const fetchEmployee = (req,res,next) => { 
 
     const token = req.header('auth-token')
     if(!token){

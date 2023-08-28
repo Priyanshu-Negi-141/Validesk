@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const locationSchema = new Schema({
-  latitude: {type: Number,required: true,},
-  longitude: {type: Number,required: true,},
+  latitude: {type: Number},
+  longitude: {type: Number},
   address: {type: String, require: true},
   fetchTime: {type: Date, default: Date.now, required: true,},
 });

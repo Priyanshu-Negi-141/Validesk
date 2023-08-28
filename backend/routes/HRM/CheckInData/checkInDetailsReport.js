@@ -78,7 +78,7 @@ const router = express.Router()
 
 router.post('/addCheckIn', fetchEmployee, async (req, res) => {
     try {
-        const { login, login_location, checkInType,activity, login_address, site_name } = req.body;
+        const { login_location, checkInType,activity, login_address, site_name } = req.body;
        
         const employee = await EmployeeDetails.findById(req.employeeData.id);
         if (!employee) {
@@ -121,7 +121,6 @@ router.post('/addCheckIn', fetchEmployee, async (req, res) => {
                 mobile_number: employeeDetailsData.mobile_number,
                 department: employeeDetailsData.department,
             },
-            login: login,
             checkInType: checkInType,
             activity: activity,
             login_location: {

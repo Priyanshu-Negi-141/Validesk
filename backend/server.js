@@ -20,6 +20,7 @@ app.use('/api/leaveApplication', require('./routes/HRM/LeavApplication/leaveAppl
 // app.use('/api/dayReport', require('./routes/HRM/dayReportData'))
 // app.use('/api/checkIn', require('./routes/HRM/checkInDataReport'))
 app.use('/api/checkInDetails', require('./routes/HRM/CheckInData/checkInDetailsReport'))
+app.use('/api/profileImage', require('./routes/HRM/ProfileImage/predefineImage'))
 app.use('/api/sop', require('./routes/Quality/SOP/electroTechnical'))
 app.use('/api/sop', require('./routes/Quality/SOP/mechenicalSOP'))
 app.use('/api/sop', require('./routes/Quality/SOP/thermalSOP'))
