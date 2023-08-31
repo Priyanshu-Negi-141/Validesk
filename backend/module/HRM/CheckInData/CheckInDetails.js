@@ -23,6 +23,7 @@ const checkInSchema = new Schema({
   date: {type: Date,default: Date.now,required: true,},
   activity: {type: String,require: true,},
   checkInType: {type: String,require: true,},
+  image_url: {type: String},
   site_name: {type: String,require: true,},
   login_location: {
     type: {

@@ -4,8 +4,10 @@ const CheckInDetails = require('../../../module/HRM/CheckInData/CheckInDetails')
 const fetchEmployee = require('../../../middleware/fetchEmployee');
 const { body, validationResult, check } = require("express-validator");
 const router = express.Router()
-
-
+const { S3Client, GetObjectCommand } = require('@aws-sdk/client-s3');
+const { Readable } = require('stream');
+const { putObject } = require('../../../s3-bucket/bucket');
+const { upload, uploadImageToS3 } = require('../../../s3-bucket/s3Service');
 
 // router.post('/addCheckIn', fetchEmployee, async (req, res) => {
 //     try {
@@ -74,11 +76,43 @@ const router = express.Router()
 //         res.status(500).json({ message: 'An error occurred' });
 //     }
 // });
+
+
+router.get('/generate-upload-url', async (req, res) => {
+    try {
+      const fileName = `image-${Date.now()}.jpeg`;
+      const contentType = 'image/jpeg';
+  
+      const url = await putObject(fileName, contentType);
+
+      const response = {
+        status: true,
+        message: 'Upload URL generated successfully',
+        data: [
+          {
+            img_path: fileName,
+            url: url
+          },
+        ],
+      };
+  
+      res.json(response);
+    } catch (error) {
+        console.error('Error generating upload URL:', error);
+        const response = {
+            status: false,
+            message: 'Unable to generate upload URL',
+            data: [],
+          };
+          res.status(500).json(response);
+    }
+  });
+
  
 
-router.post('/addCheckIn', fetchEmployee, async (req, res) => {
+  router.post('/addCheckIn', fetchEmployee, async (req, res) => {
     try {
-        const { login_location, checkInType,activity, login_address, site_name } = req.body;
+        const { login_location, checkInType,activity, login_address, site_name, image_path } = req.body;
        
         const employee = await EmployeeDetails.findById(req.employeeData.id);
         if (!employee) {
@@ -129,6 +163,7 @@ router.post('/addCheckIn', fetchEmployee, async (req, res) => {
                 time: new Date()
             },
             login_address: login_address,
+            image_url: image_path,
             site_name: site_name,
             locationData: [
                 {
@@ -194,44 +229,89 @@ router.post('/addLocationData/:id', async (req, res) => {
 });
 
 
-router.post('/addLogoutDetails/:id', async (req, res) => {
+// router.post('/addLogoutDetails/:id', async (req, res) => {
+//     try {
+//         const checkInId = req.params.id;
+//         const { logout_location, logout_address } = req.body;
+
+//         const checkIn = await CheckInDetails.findById(checkInId);
+//         if (!checkIn) {
+//             return res.status(404).json({status: false, message: 'Check-in data not found', data: null });
+//         }
+
+//         // Check if logout details already exist
+//         if (checkIn.logout_location && checkIn.logout_address) {
+//             return res.status(200).json({ status: false, message: 'Logout details have already been submitted', data: null });
+//         }
+
+//         checkIn.logout_location = {
+//             latitude: logout_location.latitude,
+//             longitude: logout_location.longitude,
+//             time: new Date()
+//         };
+//         checkIn.logout_address = logout_address;
+
+//         // Add logout details to locationData
+//         checkIn.locationData.push({
+//             latitude: logout_location.latitude,
+//             longitude: logout_location.longitude,
+//             address: logout_address,
+//             fetchTime: new Date()
+//         });
+
+//         const newCheckInData = await checkIn.save();
+
+//         res.status(201).json({ status: true, message: 'Logout details submitted successfully',  data: newCheckInData});
+//     } catch (error) {
+//         console.error('Error submitting logout details:', error);
+//         res.status(500).json({status: false, message: 'An error occurred', data: error });
+//     }
+// });
+
+
+router.post('/addCheckOut', fetchEmployee, async (req, res) => {
     try {
-        const checkInId = req.params.id;
+        const { employeeData } = req;
+        const today = new Date();
+        today.setUTCHours(0, 0, 0, 0); // Set time to midnight in UTC
+
+        // Find the check-in record for the employee for today
+        const existingCheckIn = await CheckInDetails.findOne({
+            'Employee.id': employeeData.id,
+            date: {
+                $gte: today, // Greater than or equal to today's midnight
+                $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000) // Less than tomorrow's midnight
+            }
+        });
+
+        if (!existingCheckIn || !existingCheckIn.checkedInToday) {
+            return res.status(400).json({status: false, message: 'You have not checked in today or already checked out.', data: null });
+        }
+
+        // Check if logout details have already been submitted
+        if (existingCheckIn.logout_location && existingCheckIn.logout_address) {
+            return res.status(400).json({status: false, message: 'You have already checked out. Please check in again to check out.', data:null });
+        }
+
+        // Update the existing check-in record with checkout details
         const { logout_location, logout_address } = req.body;
-
-        const checkIn = await CheckInDetails.findById(checkInId);
-        if (!checkIn) {
-            return res.status(404).json({status: false, message: 'Check-in data not found', data: null });
-        }
-
-        // Check if logout details already exist
-        if (checkIn.logout_location && checkIn.logout_address) {
-            return res.status(200).json({ status: false, message: 'Logout details have already been submitted', data: null });
-        }
-
-        checkIn.logout_location = {
+        existingCheckIn.logout_location = {
             latitude: logout_location.latitude,
             longitude: logout_location.longitude,
             time: new Date()
         };
-        checkIn.logout_address = logout_address;
+        existingCheckIn.logout_address = logout_address;
+        const checkOut = await existingCheckIn.save();
 
-        // Add logout details to locationData
-        checkIn.locationData.push({
-            latitude: logout_location.latitude,
-            longitude: logout_location.longitude,
-            address: logout_address,
-            fetchTime: new Date()
-        });
-
-        const newCheckInData = await checkIn.save();
-
-        res.status(201).json({ status: true, message: 'Logout details submitted successfully',  data: newCheckInData});
+        res.status(200).json({status: true, message: 'Check-out data added successfully', data: checkOut._id });
     } catch (error) {
-        console.error('Error submitting logout details:', error);
+        console.error('Error adding check-out data:', error);
         res.status(500).json({status: false, message: 'An error occurred', data: error });
     }
 });
+
+
+
 
 
 
@@ -318,8 +398,6 @@ router.post('/checkInEmployeeData', async (req, res) => {
     }
   });
   
-  
-
 
 
 

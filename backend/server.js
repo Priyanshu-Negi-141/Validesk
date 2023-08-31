@@ -1,14 +1,49 @@
 require('dotenv').config()
 const express = require("express")
 const connectToMongo = require("./db/db")
-const cors = require("cors")
+const aws = require('aws-sdk');
+const cors = require("cors");
+const bodyParser = require('body-parser'); // Import body-parser
+
 
 
 const app = express()
 const PORT = process.env.PORT || 8000
 
+
 app.use(cors())
 app.use(express.json())
+
+app.use(bodyParser.json()); // Use body-parser for JSON parsing
+app.use(bodyParser.urlencoded({ extended: true })); // Enable URL-encoded data parsing
+
+aws.config.update({
+    accessKeyId: 'AKIAZZQYAT4GWMMHNTIT',
+    secretAccessKey: 'sSxc5ulSHh9ynPrZB4Ar6D8d4GXhL6mJgr9',
+    region: 'ap-south-1'
+});
+
+const s3 = new aws.S3();
+
+app.get('/generate-upload-url', (req, res) => {
+    const fileName = `image-${Date.now()}.png`;
+    const contentType = 'image/png';
+
+    const params = {
+        Bucket: 'star-calibration',
+        Key: `/uploads/employee/check-in/${fileName}`,
+        ContentType: contentType
+        // ACL: 'public-read' // Allow public access
+    };
+
+    s3.getSignedUrl('putObject' , params, (err, url) => {
+        if (err) {
+            return res.status(500).json({ error: err.message });
+        }
+        console.log(url)
+        res.json({ url });
+    });
+});
 
 
 // Available Routes
