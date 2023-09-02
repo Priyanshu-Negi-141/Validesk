@@ -15,7 +15,6 @@ const fetchEmployee = (req,res,next) => {
         req.employeeData = data.employeeData
         next()  
     } catch (error) {
-        console.error('Token verification error:', error);
         res.status(401).send({error: "Please authenticate using a valid token"})
     }
 }

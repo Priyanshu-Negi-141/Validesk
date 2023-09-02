@@ -16,5 +16,13 @@ const calibrationMasterSchema = new Schema({
     traceability: {type:String,required:true},
 })
 
+const masterDetailsSchema = new Schema({
+    master_type: {type:String,required:true},
+    stream: {type:String,required:true},
+})
+
+
+
+
 const CalibrationMasterData = mongoose.model("CalibrationMasterData",calibrationMasterSchema)
 module.exports=CalibrationMasterData;

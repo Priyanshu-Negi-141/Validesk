@@ -7,7 +7,7 @@ const locationSchema = new Schema({
   address: {type: String, require: true},
   fetchTime: {type: Date, default: Date.now, required: true,},
 });
-
+ 
 const checkInSchema = new Schema({
   Employee: {
     id: {

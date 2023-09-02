@@ -1,6 +1,6 @@
 require('dotenv').config()
 const mongoose = require("mongoose");
-const mongoDBURL = process.env.MONGO_URL
+const mongoDBURL = "mongodb+srv://starCalibration:starCalibrationBack@cluster0.yamsv6s.mongodb.net/StarCalibration"
 
 // Connect to DB
 const connectToMongo = mongoose.connect(mongoDBURL, {

@@ -8,7 +8,7 @@ const bodyParser = require('body-parser'); // Import body-parser
 
 
 const app = express()
-const PORT = process.env.PORT || 8000
+const PORT = process.env.PORT || 8001
 
 
 app.use(cors())
@@ -49,6 +49,9 @@ app.get('/generate-upload-url', (req, res) => {
 // Available Routes
 app.use("/api/auth", require('./routes/loginEmployee'))
 app.use("/api/auth", require('./routes/HRM/employeData'))
+app.use("/api/homePage", require('./routes/HomePage/Calibration/calibration'))
+app.use("/api/homePage", require('./routes/HomePage/HVAC/hvac'))
+app.use("/api/homePage", require('./routes/HomePage/Thermal/thermal'))
 app.use("/api/employee", require('./routes/HRM/Employee/employeeData'))
 app.use('/api/dayReportDetails', require('./routes/HRM/DayReport/dayReportDetails'))
 app.use('/api/leaveApplication', require('./routes/HRM/LeavApplication/leaveApplicationDetails'))
@@ -62,6 +65,8 @@ app.use('/api/sop', require('./routes/Quality/SOP/thermalSOP'))
 app.use('/api/masterInstrument', require('./routes/Quality/MasterInstrument/calibrationMaster'))
 app.use('/api/masterInstrument', require('./routes/Quality/MasterInstrument/hvacMaster'))
 app.use('/api/masterInstrument', require('./routes/Quality/MasterInstrument/thermalMaster'))
+app.use('/api/masterInstrument', require('./routes/Quality/MasterInstrument/masterDepartment'))
+app.use('/api/masterInstrument', require('./routes/Quality/MasterInstrument/masterInstrumentDetails'))
 app.use('/api/client', require('./routes/Client/clientData'))
 app.use('/api/certificate', require('./routes/Certificate/Calibration/calCertificate'))
 app.use('/api/unitParameter', require('./routes/Quality/UnitParameter/unitParameter'))
