@@ -8,7 +8,7 @@ const bodyParser = require('body-parser'); // Import body-parser
 
 
 const app = express()
-const PORT = process.env.PORT || 8001
+const PORT = process.env.PORT || 8000
 
 
 app.use(cors())
@@ -70,6 +70,7 @@ app.use('/api/masterInstrument', require('./routes/Quality/MasterInstrument/mast
 app.use('/api/client', require('./routes/Client/clientData'))
 app.use('/api/certificate', require('./routes/Certificate/Calibration/calCertificate'))
 app.use('/api/unitParameter', require('./routes/Quality/UnitParameter/unitParameter'))
+app.use('/api/upload', require('./routes/Upload/uploadApplication'))
 
 
 app.get('/', (req,res) => {

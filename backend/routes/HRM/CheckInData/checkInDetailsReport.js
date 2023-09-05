@@ -6,6 +6,7 @@ const { body, validationResult, check } = require("express-validator");
 const router = express.Router();
 const { putObject } = require("../../../s3-bucket/bucket");
 const schedule = require("node-schedule");
+const moment = require("moment-timezone");
 const istTimeZone = "Asia/Kolkata";
 
 // router.post('/addCheckIn', fetchEmployee, async (req, res) => {
@@ -125,6 +126,10 @@ router.post("/addCheckIn", fetchEmployee, async (req, res) => {
     }
     const employeeDetailsData = employee.employeeData[0];
 
+    const istNow = moment.tz("Asia/Kolkata");
+
+    const istStart = istNow.clone().startOf("day");
+    const istEnd = istNow.clone().endOf("day");
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0); // Set time to midnight in UTC
 
@@ -132,8 +137,8 @@ router.post("/addCheckIn", fetchEmployee, async (req, res) => {
     const existingCheckIn = await CheckInDetails.findOne({
       "Employee.id": employee._id,
       date: {
-        $gte: today, // Greater than or equal to today's midnight
-        $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000), // Less than tomorrow's midnight
+        $gte: istStart.toDate(), // Greater than or equal to today's midnight
+        $lt: istEnd.toDate(), // Less than tomorrow's midnight
       },
     });
 
@@ -170,9 +175,10 @@ router.post("/addCheckIn", fetchEmployee, async (req, res) => {
       login_location: {
         latitude: login_location.latitude,
         longitude: login_location.longitude,
-        time: new Date(),
+        time: istNow.toDate(),
       },
       login_address: login_address,
+      date: istNow.toDate(),
       image_url: image_path,
       site_name: site_name,
       locationData: [
@@ -180,7 +186,7 @@ router.post("/addCheckIn", fetchEmployee, async (req, res) => {
           latitude: login_location.latitude,
           longitude: login_location.longitude,
           address: login_address,
-          fetchTime: new Date(),
+          fetchTime: istNow.toDate(),
         },
       ],
       checkedInToday: true, // Mark user as checked in for the day
@@ -205,6 +211,10 @@ router.post("/addLocationData/:id", async (req, res) => {
   try {
     const checkInId = req.params.id;
     const { latitude, longitude, address } = req.body;
+
+    const istNow = moment.tz("Asia/Kolkata");
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set time to midnight in UTC
 
     const checkIn = await CheckInDetails.findById(checkInId);
     if (!checkIn) {
@@ -238,7 +248,7 @@ router.post("/addLocationData/:id", async (req, res) => {
       latitude: latitude,
       longitude: longitude,
       address: address,
-      fetchTime: new Date(),
+      fetchTime: istNow.toDate(),
     };
 
     checkIn.locationData.push(newLocationData);
@@ -256,72 +266,6 @@ router.post("/addLocationData/:id", async (req, res) => {
       .json({ status: false, message: "An error occurred", data: error });
   }
 });
-
-// router.post("/addLocationData/:id", async (req, res) => {
-//   try {
-//     const checkInId = req.params.id;
-//     const { latitude, longitude, address } = req.body;
-
-//     const checkIn = await CheckInDetails.findById(checkInId);
-//     if (!checkIn) {
-//       return res.status(404).json({
-//         status: false,
-//         message: "Check-in data not found",
-//         data: null,
-//       });
-//     }
-
-//     // Check if logout details have already been submitted
-//     if (checkIn.logout_location && checkIn.logout_address) {
-//       return res.status(200).json({
-//         status: false,
-//         message: "You have already checked out. Please check in again.",
-//         data: null,
-//       });
-//     }
-
-//     // Check if login details haven't been submitted
-//     if (!checkIn.login_location || !checkIn.login_address) {
-//       return res.status(400).json({
-//         status: false,
-//         message: "Please check in first before adding location data.",
-//         data: null,
-//       });
-//     }
-
-//     // Add location data only if login details have been submitted and logout details haven't
-//     const newLocationData = {
-//       latitude: latitude,
-//       longitude: longitude,
-//       address: address,
-//       fetchTime: new Date(),
-//     };
-
-//     checkIn.locationData.push(newLocationData);
-
-//     // Check if logout details are available, if so, add them to location data
-//     if (checkIn.logout_location && checkIn.logout_address) {
-//       const logoutLocationData = {
-//         latitude: checkIn.logout_location.latitude,
-//         longitude: checkIn.logout_location.longitude,
-//         address: checkIn.logout_address,
-//         fetchTime: new Date(),
-//       };
-//       checkIn.locationData.push(logoutLocationData);
-//     }
-
-//     const locData = await checkIn.save();
-
-//     res.status(201).json({
-//       status: true,
-//       message: "Location data added successfully",
-//       data: locData,
-//     });
-//   } catch (error) {
-//     console.error("Error adding location data:", error);
-//     res.status(500).json({ status: false, message: "An error occurred", data: error });
-//   }
-// });
 
 // router.post('/addLogoutDetails/:id', async (req, res) => {
 //     try {
@@ -441,15 +385,19 @@ checkoutJob.on("error", (err) => {
 router.post("/addLogoutDetails", fetchEmployee, async (req, res) => {
   try {
     const { employeeData } = req;
+
+    const istNow = moment.tz("Asia/Kolkata");
+    const istStart = istNow.clone().startOf("day");
+    const istEnd = istNow.clone().endOf("day");
     const today = new Date();
     today.setUTCHours(0, 0, 0, 0); // Set time to midnight in UTC
 
-    // Find the check-in record for the employee for today
+    // Find existing check-in for the day
     const existingCheckIn = await CheckInDetails.findOne({
       "Employee.id": employeeData.id,
       date: {
-        $gte: today, // Greater than or equal to today's midnight
-        $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000), // Less than tomorrow's midnight
+        $gte: istStart.toDate(), // Greater than or equal to today's midnight
+        $lt: istEnd.toDate(), // Less than tomorrow's midnight
       },
     });
 
@@ -476,7 +424,7 @@ router.post("/addLogoutDetails", fetchEmployee, async (req, res) => {
     existingCheckIn.logout_location = {
       latitude: logout_location.latitude,
       longitude: logout_location.longitude,
-      time: new Date(),
+      time: istNow.toDate(),
     };
     existingCheckIn.logout_address = logout_address;
 
@@ -485,7 +433,7 @@ router.post("/addLogoutDetails", fetchEmployee, async (req, res) => {
       latitude: logout_location.latitude,
       longitude: logout_location.longitude,
       address: logout_address,
-      fetchTime: new Date(),
+      fetchTime: istNow.toDate(),
     });
 
     const checkOut = await existingCheckIn.save();
