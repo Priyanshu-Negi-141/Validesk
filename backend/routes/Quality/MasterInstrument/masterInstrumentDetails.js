@@ -48,6 +48,27 @@ router.post("/addMasterInstrumentData", async (req, res) => {
   });
 
 
+  router.put("/updateMasterInstrumentData/:id", async (req, res) => {
+    try {
+      const masterInstrumentDataId = req.params.id;
+      const updatedData = req.body; // Assuming the request body contains the updated data
+  
+      // Find the existing record by ID and update it
+      await MasterInstrumentData.findByIdAndUpdate(masterInstrumentDataId, updatedData);
+  
+      res.status(200).json({ status: true, message: "Data updated successfully in CalibrationMaster" });
+    } catch (error) {
+      res.status(500).json({
+        error: "An error occurred while updating the data in CalibrationMaster",
+        data: error,
+      });
+      console.log(error);
+    }
+  });
+  
+
+
+
 // Sanju Jija ji ko dene wali api
   router.get("/fetchInstrumentDataByDepartment/:departmentId", async (req, res) => {
     try {

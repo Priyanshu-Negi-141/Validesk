@@ -7,13 +7,13 @@ const masterInstrumentSchema = new Schema({
         sessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'SessionData', required: true },
         sessionYear: { type: Number, required: true }
     },
-    master_type: { type: String, required: true },
     department: {
         id: { type: mongoose.Schema.Types.ObjectId, ref: 'MasterDepartmentData', required: true }
     },
     stream: { type: String},
     instrument_name: { type: String, required: true },
-    make_model: { type: String, required: true },
+    make: { type: String, required: true },
+    model: { type: String, required: true },
     serial_number: { type: String, required: true },
     id_number: { type: String, required: true },
     mode: { type: String, required: true },
@@ -28,12 +28,8 @@ const masterInstrumentSchema = new Schema({
     cf_number: { type: String, required: true },
     accuracy: { type: String, required: true },
     traceability: { type: String, required: true },
-    drift: { type: String, required: true },
-    remarks: { type: String, required: true },
-    stability: { type: String, required: true },
     uncertainty: { type: String, required: true },
     uncertaintyTerm: { type: String, required: true },
-    uniformity: { type: String, required: true },
     accuracyDetails: {
       absoluteValue: { type: String, required: true },
       perOfRange: { type: String, required: true },
@@ -48,10 +44,18 @@ const masterInstrumentSchema = new Schema({
     ],
     uncData: [
         {
-            point: {type: String, required: true},
-            unc: {type: String, required: true},
-            unit: {type: String, required: true}
+          calibrationPoint: {type: String, required: true},
+          error: {type: String, required: true},
+          uncertainity: {type: String, required: true},
+          unit: {type: String, required: true}
         }
+    ],
+    uniformity: [
+      {
+        setPoint: {type: String, required: true},
+        uniformity: {type: String, required: true},
+        stability: {type: String, required: true}
+      }
     ]
 })
 
