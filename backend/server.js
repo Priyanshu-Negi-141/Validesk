@@ -17,34 +17,6 @@ app.use(express.json())
 app.use(bodyParser.json()); // Use body-parser for JSON parsing
 app.use(bodyParser.urlencoded({ extended: true })); // Enable URL-encoded data parsing
 
-aws.config.update({
-    accessKeyId: 'AKIAZZQYAT4GWMMHNTIT',
-    secretAccessKey: 'sSxc5ulSHh9ynPrZB4Ar6D8d4GXhL6mJgr9',
-    region: 'ap-south-1'
-});
-
-const s3 = new aws.S3();
-
-app.get('/generate-upload-url', (req, res) => {
-    const fileName = `image-${Date.now()}.png`;
-    const contentType = 'image/png';
-
-    const params = {
-        Bucket: 'star-calibration',
-        Key: `/uploads/employee/check-in/${fileName}`,
-        ContentType: contentType
-        // ACL: 'public-read' // Allow public access
-    };
-
-    s3.getSignedUrl('putObject' , params, (err, url) => {
-        if (err) {
-            return res.status(500).json({ error: err.message });
-        }
-        console.log(url)
-        res.json({ url });
-    });
-});
-
 
 // Available Routes
 app.use("/api/auth", require('./routes/loginEmployee'))
@@ -70,6 +42,7 @@ app.use('/api/masterInstrument', require('./routes/Quality/MasterInstrument/mast
 app.use('/api/client', require('./routes/Client/clientData'))
 app.use('/api/certificate', require('./routes/Certificate/Calibration/calCertificate'))
 app.use('/api/unitParameter', require('./routes/Quality/UnitParameter/unitParameter'))
+app.use('/api/session', require('./routes/Session/session'))
 app.use('/api/upload', require('./routes/Upload/uploadApplication'))
 
 

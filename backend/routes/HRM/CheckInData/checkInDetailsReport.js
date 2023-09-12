@@ -4,7 +4,7 @@ const CheckInDetails = require("../../../module/HRM/CheckInData/CheckInDetails")
 const fetchEmployee = require("../../../middleware/fetchEmployee");
 const { body, validationResult, check } = require("express-validator");
 const router = express.Router();
-const { putObject } = require("../../../s3-bucket/bucket");
+const { putObject, getObjectURL } = require("../../../s3-bucket/bucket");
 const schedule = require("node-schedule");
 const moment = require("moment-timezone");
 const istTimeZone = "Asia/Kolkata";
@@ -106,6 +106,49 @@ router.get("/generate-upload-url", async (req, res) => {
     res.status(500).json(response);
   }
 });
+
+
+
+router.get("/get-employee-checkin-img/:id", async(req,res) => {
+  try {
+    const {id} = req.params
+    const employeeData = await CheckInDetails.findById(id)
+    if(!employeeData){
+      return  res.status(404).json({
+        status:false,
+        message:"No Employee Found",
+        data: null,
+      })
+    }
+    const imagePath = employeeData.image_url
+    if(!imagePath){
+      return res.status(404).json({
+        status: false,
+        message:'Image Not Available',
+        data: null
+      })
+    }
+    const url = await getObjectURL(imagePath);
+    if(!url){
+      return   res.sendStatus(404)
+    }
+    res.status(200).json({
+      status:true,
+      message:"Image fetched Successfully" ,
+      data:[{imagePath,url}]
+    })
+  } catch (error) {
+    console.error("Error getting Employee Details:", error );
+    res.status(403).json({
+      status:false,
+      message:"Getting some error" ,
+      data:error
+    })
+  }
+})
+
+
+
 
 router.post("/addCheckIn", fetchEmployee, async (req, res) => {
   try {

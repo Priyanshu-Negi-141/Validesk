@@ -194,7 +194,8 @@ router.post('/login',[
             // Ask user to create a PIN since it's their first-time login
             return res.json({ success: true, createPin: true });
           }
-  
+
+        
           const authtoken = jwt.sign(data, JWT_SECRET);
           const employeeFirstName = employeeData.employeeData[0].fName; // Assuming the field name is 'firstName'
           const employeeLastName = employeeData.employeeData[0].lName; 

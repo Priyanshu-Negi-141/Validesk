@@ -10,7 +10,6 @@ router.post("/addCalibrationMasterData", async (req, res) => {
 
     const newCalibrationData = new CalibrationMasterData(calibrationData);
     await newCalibrationData.save();
-
     res
       .status(200)
       .json({ message: "Data saved successfully in CalibrationMaster" });
@@ -118,5 +117,26 @@ router.delete("/deleteElectroTechnicalSOP/:id", async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 });
+
+
+
+
+// For edit purpose
+
+router.get("/fetchMasterUniqueID/:id", async (req, res) => {
+  try {
+    let id = req.params.id;
+    const masterID = await CalibrationMasterData.findById(id);
+    if (!masterID) {
+      throw "No such record found";
+    } else {
+      res.json(masterID);
+    }
+  } catch (err) {
+    console.log("Error in fetching Unique Id");
+  }
+});
+
+
 
 module.exports = router;

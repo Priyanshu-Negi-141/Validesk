@@ -222,6 +222,37 @@ router.get('/masterDepartmentData',fetchEmployee, async (req, res) => {
       });
     }
   });
+
+
+
+  // New things
+
+  // Define a route to get department names
+  router.get('/departments', async (req, res) => {
+    try {
+      const departments = await MasterDepartmentData.find({}, '_id departmentName');
+      res.json(departments);
+    } catch (err) {
+      console.error(err);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  });
+
+
+  router.get('/streamName/:departmentId', async(req,res) => {
+    const departmentId = req.params.departmentId
+    try {
+      const stream = await MasterDepartmentData.findById(departmentId)
+      if(!stream){
+        return res.status(404).json({ error: 'Stream not found' });
+      }
+      res.json(stream.streamDetails[0].streamName);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ error: 'Internal Server Error' });
+    }
+  })
+
   
 
 

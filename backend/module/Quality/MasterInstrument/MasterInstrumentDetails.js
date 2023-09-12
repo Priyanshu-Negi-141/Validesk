@@ -2,64 +2,58 @@ const mongoose = require("mongoose")
 const Schema = mongoose.Schema
 
 
-const instrumentDetailsSchema = new Schema({
-    instrument_name: {type:String,required:true},
-    make_model: {type:String,required:true},
-    serial_number: {type:String,required:true},
-    id_number: {type:String,required:true},
-    range: {type:String,required:true},
-    least_count: {type:String,required:true},
-    calibration_date: {type:String,required:true},
-    due_date: {type:String,required:true},
-    cf_number: {type:String,required:true},
-    accuracy: {type:String,required:true},
-    traceability: {type:String,required:true},
-})
-
-
-const masterDetailsSchema = new Schema({
-    master_type: {type:String,required:true},
-    Department : {
-        id: {
-            type: mongoose.Schema.Types.ObjectId,
-            ref: 'MasterDepartmentData',
-            required : true
-        },
-        departmentName: {type : String, requried: true},
-        streamName: {type: String}
-    },
-    instrumentDetails: {instrumentDetailsSchema}
-})
-
-
 const masterInstrumentSchema = new Schema({
-    masterDetails: [masterDetailsSchema]
+    sessionDetails: {
+        sessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'SessionData', required: true },
+        sessionYear: { type: Number, required: true }
+    },
+    master_type: { type: String, required: true },
+    department: {
+        id: { type: mongoose.Schema.Types.ObjectId, ref: 'MasterDepartmentData', required: true }
+    },
+    stream: { type: String},
+    instrument_name: { type: String, required: true },
+    make_model: { type: String, required: true },
+    serial_number: { type: String, required: true },
+    id_number: { type: String, required: true },
+    mode: { type: String, required: true },
+    range: {
+      minRange: { type: String, required: true },
+      maxRange: { type: String, required: true },
+      parameterName: { type: String, required: true },
+    },
+    least_count: { type: String, required: true },
+    calibration_date: { type: Date, required: true },
+    due_date: { type: Date, required: true },
+    cf_number: { type: String, required: true },
+    accuracy: { type: String, required: true },
+    traceability: { type: String, required: true },
+    drift: { type: String, required: true },
+    remarks: { type: String, required: true },
+    stability: { type: String, required: true },
+    uncertainty: { type: String, required: true },
+    uncertaintyTerm: { type: String, required: true },
+    uniformity: { type: String, required: true },
+    accuracyDetails: {
+      absoluteValue: { type: String, required: true },
+      perOfRange: { type: String, required: true },
+      perofMessurement: { type: String, required: true },
+    },
+    calibrationRange: [
+      {
+        leastCount: { type: String, required: true },
+        maxRange: { type: String, required: true },
+        minRange: { type: String, required: true },
+      },
+    ],
+    uncData: [
+        {
+            point: {type: String, required: true},
+            unc: {type: String, required: true},
+            unit: {type: String, required: true}
+        }
+    ]
 })
-
-
-// 
 
 const MasterInstrumentData = mongoose.model("MasterInstrumentData", masterInstrumentSchema);
-// Define a post hook to update masterDetailsSchema when MasterDepartmentData changes
-MasterInstrumentData.post('update', async function (doc) {
-    // Assuming doc is the updated MasterInstrumentData document
-    // Fetch the updated MasterDepartmentData document
-    const updatedMasterDepartmentData = await mongoose.model('MasterDepartmentData').findById(doc.Department.id);
-    // Update the relevant fields in masterDetailsSchema
-    doc.masterDetails.forEach((masterDetail) => {
-        if (masterDetail.Department.id.equals(updatedMasterDepartmentData._id)) {
-            // Update fields as needed
-            masterDetail.Department.departmentName = updatedMasterDepartmentData.departmentName;
-            masterDetail.Department.streamName = updatedMasterDepartmentData.streamName;
-            // Update other fields if necessary
-        }
-    });
-
-    // Save the updated MasterInstrumentData document
-    await doc.save();
-});
-
-
-// 
-
 module.exports=MasterInstrumentData;

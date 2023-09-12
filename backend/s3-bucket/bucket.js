@@ -2,6 +2,7 @@ const {
   S3Client,
   GetObjectCommand,
   PutObjectCommand,
+  HeadBucketCommand,
 } = require("@aws-sdk/client-s3");
 const { getSignedUrl } = require("@aws-sdk/s3-request-presigner");
 
@@ -58,17 +59,14 @@ const putObject = async (fileName, contentType) => {
 
 
 
-
-
-
-
 // /uploads/employee/check-in/image-1693468762430.png
 // https://star-calibration.s3.ap-south-1.amazonaws.com//uploads/employee/check-in/image-1693468762430.png?X-Amz-Algorith20230831T075923Z&X-Amz-Expires=900&X-Amz-Signature=f0fd0bf40011a5ed3fe8371c65740ca15e0fe9cb95624f0bbb51651a5ee497cd&X-Amz-SignedHeaders=host&x-id=PutObject
 async function init() {
   console.log(
     "URL for Saved Image",
-    await getObjectURL("/uploads/application/starCalibration-1693740072940.apk")
+    await getObjectURL("/uploads/application/starCalibration-169374007294.apk")
   );
+
   // console.log("URL for uploading", await putObject(`image-${Date.now()}.jpeg`, "image/jpeg"))
 }
 
@@ -80,8 +78,7 @@ async function init() {
 //         console.error("Error:", err);
 //     }
 // }
-
-// init()
+// init() 
 
 
 module.exports = { putObject, getObjectURL };
