@@ -39,6 +39,7 @@ app.use('/api/masterInstrument', require('./routes/Quality/MasterInstrument/hvac
 app.use('/api/masterInstrument', require('./routes/Quality/MasterInstrument/thermalMaster'))
 app.use('/api/masterInstrument', require('./routes/Quality/MasterInstrument/masterDepartment'))
 app.use('/api/masterInstrument', require('./routes/Quality/MasterInstrument/masterInstrumentDetails'))
+app.use('/api/rgp', require('./routes/RGP-DC/RGP/rgpDetails'))
 app.use('/api/client', require('./routes/Client/clientData'))
 app.use('/api/certificate', require('./routes/Certificate/Calibration/calCertificate'))
 app.use('/api/unitParameter', require('./routes/Quality/UnitParameter/unitParameter'))

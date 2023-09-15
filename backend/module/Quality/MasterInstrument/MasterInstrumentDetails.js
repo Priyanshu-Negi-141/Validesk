@@ -17,11 +17,13 @@ const masterInstrumentSchema = new Schema({
     serial_number: { type: String, required: true },
     id_number: { type: String, required: true },
     mode: { type: String, required: true },
-    range: {
+    rangeData: [
+      {
       minRange: { type: String, required: true },
       maxRange: { type: String, required: true },
-      parameterName: { type: String, required: true },
-    },
+      parameter: { type: String, required: true },
+      }
+    ],
     least_count: { type: String, required: true },
     calibration_date: { type: Date, required: true },
     due_date: { type: Date, required: true },
@@ -40,6 +42,7 @@ const masterInstrumentSchema = new Schema({
         leastCount: { type: String, required: true },
         maxRange: { type: String, required: true },
         minRange: { type: String, required: true },
+        unit: {type: String, required: true}
       },
     ],
     uncData: [
