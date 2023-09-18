@@ -31,7 +31,7 @@ const rgpSchema = new Schema({
     },
     receivedByName: { type: String, require: true },
   },
-  data: {type:Date.now(), require: true},
+  date: { type: Date, default: Date.now(), required: true },
   rgpStatus : { type: String, require: true },
 });
 
